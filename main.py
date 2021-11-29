@@ -22,8 +22,12 @@ def main():
     for img in train_dataset:
         predictions.append(np.asarray(model.predict(np.expand_dims(img, axis=0))[0, 0, :, :, :], dtype=np.int32))
     #plot_conv_lstm(model, train_dataset, val_dataset)
-    animate(predictions)
+    animate(predictions, 'predictions.gif')
 
+    trains = []
+    for img in train_dataset:
+        trains.append(img[0, :, :, :])
+    animate(trains, 'train.gif')
 
 if __name__ == '__main__':
     main()

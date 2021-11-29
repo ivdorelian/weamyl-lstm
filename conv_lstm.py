@@ -125,10 +125,13 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
     early_stopping = keras.callbacks.EarlyStopping(monitor="val_loss",
                                                    patience=10)
     reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor="val_loss",
-                                                  patience=5)
+						  factor=0.5,
+                                                  patience=5,
+						  min_delta=0.1,
+						  verbose=1)
 
     # Define modifiable training hyperparameters.
-    epochs = 100
+    epochs = 160
     batch_size = 5
 
     # Fit the model to the training data.
@@ -138,7 +141,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         batch_size=batch_size,
         epochs=epochs,
         validation_data=(x_val, y_val),
-        callbacks=[early_stopping, reduce_lr]
+        callbacks=[reduce_lr]
     )
 
     return model
