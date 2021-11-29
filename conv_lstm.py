@@ -112,7 +112,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         activation="relu",
     )(x)
     x = layers.Conv3D(
-        filters=3, kernel_size=(1, 1, 1), activation="sigmoid", padding="same"
+        filters=3, kernel_size=(1, 1, 1), activation="relu", padding="same"
     )(x)
 
     # Next, we will build the complete model and compile it.
