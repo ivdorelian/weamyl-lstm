@@ -20,7 +20,7 @@ def main():
     model = run_conv_lstm(x_train, y_train, x_val, y_val)
     predictions = []
     for img in train_dataset:
-        predictions.append(model.predict(np.expand_dims(img, axis=0))[0, 0, :, :, :])
+        predictions.append(np.asarray(model.predict(np.expand_dims(img, axis=0))[0, 0, :, :, :], dtype=np.int32))
     #plot_conv_lstm(model, train_dataset, val_dataset)
     animate(predictions)
 
