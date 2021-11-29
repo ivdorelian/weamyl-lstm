@@ -17,7 +17,7 @@ class DataReader:
             seqed_data.append(stacked[i:i+seq_len])
         return np.stack(seqed_data)
 
-    def get_numpy_arrays(self, variable, seq_len=20):
+    def get_numpy_arrays(self, variable, seq_len=5):
 
         filepaths = glob(os.path.join(os.getcwd(), self.DATA_FOLDER) + '/*')
         filepaths = sorted(filepaths)
@@ -27,7 +27,7 @@ class DataReader:
             net_cdf_data = xr.open_dataset(filepath, engine='netcdf4')
             numpy_array = net_cdf_data.variables[variable].data[0]
             numpy_array = np.moveaxis(numpy_array, 0, 2)
-            numpy_array = cv2.resize(numpy_array, dsize=(320, 240))
+            numpy_array = cv2.resize(numpy_array, dsize=(160, 120))
             results.append(np.asarray(numpy_array, dtype=np.int32))
 
         return self.get_seqed(results, seq_len)

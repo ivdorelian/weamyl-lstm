@@ -29,8 +29,18 @@ def get_data_for_conv_lstm(dataset):
     val_dataset = dataset[val_index]
 
     # Normalize the data to the 0-1 range.
-    train_dataset = train_dataset / 255
-    val_dataset = val_dataset / 255
+    train_dataset[train_dataset < 0] = 0
+    train_dataset[train_dataset > 255] = 255
+    val_dataset[val_dataset < 0] = 0
+    val_dataset[val_dataset > 255] = 255
+    
+    min_train = np.min(train_dataset)
+    max_train = np.max(train_dataset)
+
+    print(min_train, max_train)
+
+    train_dataset = train_dataset
+    val_dataset = val_dataset
 
     # We'll define a helper function to shift the frames, where
     # `x` is frames 0 to n - 1, and `y` is frames 1 to n.
@@ -78,6 +88,13 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         return_sequences=True,
         activation="relu",
     )(inp)
+    x = layers.ConvLSTM2D(
+        filters=64,
+        kernel_size=(5, 5),
+        padding="same",
+        return_sequences=True,
+        activation="relu",
+    )(x)
     x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
         filters=64,
@@ -95,13 +112,13 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         activation="relu",
     )(x)
     x = layers.Conv3D(
-        filters=3, kernel_size=(3, 3, 3), activation="sigmoid", padding="same"
+        filters=3, kernel_size=(1, 1, 1), activation="sigmoid", padding="same"
     )(x)
 
     # Next, we will build the complete model and compile it.
     model = keras.models.Model(inp, x)
     model.compile(
-        loss=keras.losses.binary_crossentropy, optimizer=keras.optimizers.Adam(),
+        loss=keras.losses.mean_absolute_error, optimizer=keras.optimizers.Adam(learning_rate=0.001), metrics=['mae']
     )
 
     # Define some callbacks to improve training.
@@ -111,7 +128,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
                                                   patience=5)
 
     # Define modifiable training hyperparameters.
-    epochs = 20
+    epochs = 5
     batch_size = 5
 
     # Fit the model to the training data.
@@ -121,7 +138,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         batch_size=batch_size,
         epochs=epochs,
         validation_data=(x_val, y_val),
-        callbacks=[early_stopping, reduce_lr],
+        callbacks=[early_stopping, reduce_lr]
     )
 
     return model
