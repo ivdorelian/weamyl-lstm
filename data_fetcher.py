@@ -31,14 +31,14 @@ class DataFetcher:
                     with open('log.txt', 'a+') as f:
                         f.write(f'{nc_filename} seems to be too small!\n')
 
+    def handle_td(self, url, td):
+        anchor = td.find('a')
+        if anchor:
+            print(f'--- Getting {anchor["href"]}:')
+            day_url = url.replace('catalog.html', anchor['href'])
+            self.get_day(day_url)
 
     def get_month(self, url):
 
-        def handle_td(td):
-            anchor = td.find('a')
-            if anchor:
-                print(f'--- Getting {anchor["href"]}:')
-                day_url = url.replace('catalog.html', anchor['href'])
-                self.get_day(day_url)
-
-        Parallel(n_jobs=4)(delayed(handle_td)(td) for td in self.__get_tds(url))
+        tds = self.__get_tds(url)
+        Parallel(backend='loky', n_jobs=4)(delayed(self.handle_td)(url, td) for td in tds)
