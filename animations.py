@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from celluloid import Camera
 
-def animate(images):
+def animate(images, filename):
     fig = plt.figure()
     ax = plt.axes()
     ims = []
@@ -17,4 +17,4 @@ def animate(images):
         camera.snap()
 
     animation = camera.animate()
-    animation.save('animation.gif', writer='PillowWriter', fps=10)
+    animation.save(filename, writer='PillowWriter', fps=10)
