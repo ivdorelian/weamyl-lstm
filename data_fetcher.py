@@ -18,7 +18,10 @@ class DataFetcher:
             anchor = td.find('a')
             if anchor and '.nc' in anchor['href']:
                 nc_filename = anchor.tt.text
-                nc_file_data = requests.get(url.replace('catalog', 'fileServer') + nc_filename)
+                to_download = url\
+                    .replace('catalog.html', nc_filename)\
+                    .replace('/catalog/', '/fileServer/')
+                nc_file_data = requests.get(to_download)
                 with open(os.path.join(self.DATA_FOLDER, nc_filename), 'wb') as f:
                     f.write(nc_file_data.content)
                 print('Saved:', nc_filename)
