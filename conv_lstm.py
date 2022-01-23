@@ -148,7 +148,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
 						  verbose=1)
 
     # Define modifiable training hyperparameters.
-    epochs = 15
+    epochs = 50
     batch_size = 4
 
     # Fit the model to the training data.
