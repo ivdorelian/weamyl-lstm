@@ -112,25 +112,45 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         activation="relu",
     )(x)
     x = layers.BatchNormalization()(x)
-    x = layers.Conv3D(
-        filters=3, kernel_size=(1, 1, 1), activation="relu", padding="same"
-    )(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Conv3DTranspose(
-        filters=128,
-        kernel_size=(1, 1, 1),
+    x = layers.TimeDistributed(layers.Conv2DTranspose(
+        filters=256,
+        kernel_size=(2, 2),
         activation="relu",
         padding="same",
-        strides=(1, 2, 2)
+        strides=(2, 2))
     )(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Conv3DTranspose(
+    x = layers.TimeDistributed(layers.Conv2DTranspose(
+        filters=128,
+        kernel_size=(2, 2),
+        activation="relu",
+        padding="same",
+        strides=(2, 2))
+    )(x)
+    x = layers.Conv3D(
         filters=3,
         kernel_size=(1, 1, 1),
         activation="relu",
-        padding="same",
-        strides=(1, 2, 2)
+        padding="same"
     )(x)
+    #x = layers.Conv3D(
+    #    filters=512, kernel_size=(1, 1, 1), activation="relu", padding="same"
+    #)(x)
+    #x = layers.BatchNormalization()(x)
+    #x = layers.Conv3DTranspose(
+    #    filters=256,
+    #    kernel_size=(2, 2, 2),
+    #    activation="relu",
+    #    padding="same",
+    #    strides=(2, 2, 2)
+    #)(x)
+    #x = layers.BatchNormalization()(x)
+    #x = layers.Conv3DTranspose(
+    #    filters=3,
+    #    kernel_size=(1, 1, 1),
+    #    activation="relu",
+    #    padding="same",
+    #    strides=(2, 2, 2)
+    #)(x)
 
     # Next, we will build the complete model and compile it.
     model = keras.models.Model(inp, x)
