@@ -13,8 +13,8 @@ def animate(images, filename):
         if i == 0:
             ax.imshow(img)
         ims.append([im])
-        plt.pause(0.1)
+        plt.pause(0.5)
         camera.snap()
 
     animation = camera.animate()
-    animation.save(filename, writer='PillowWriter', fps=10)
+    animation.save(filename, writer='PillowWriter', fps=5)

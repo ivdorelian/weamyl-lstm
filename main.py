@@ -26,5 +26,14 @@ def main():
         trains.append(img[0, :, :, :])
     animate(trains, 'train.gif')
 
+    all = []
+    for i in range(len(predictions)):
+        pred = predictions[i]
+        train = trains[i]
+
+        all.append(np.concatenate([pred, train], axis=0))
+
+    animate(all, 'all.gif')
+
 if __name__ == '__main__':
     main()
