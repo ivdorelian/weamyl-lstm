@@ -4,7 +4,7 @@ from glob import glob
 import cv2
 import xarray as xr
 import numpy as np
-
+from tqdm import tqdm
 
 class DataReader:
 
@@ -23,7 +23,7 @@ class DataReader:
         filepaths = sorted(filepaths)
         results = []
 
-        for filepath in filepaths:
+        for filepath in tqdm(filepaths):
             net_cdf_data = xr.open_dataset(filepath, engine='netcdf4')
             numpy_array = net_cdf_data.variables[variable].data[0]
             numpy_array = np.moveaxis(numpy_array, 0, 2)

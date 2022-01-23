@@ -9,13 +9,8 @@ import io
 import imageio
 from IPython.display import Image, display
 from ipywidgets import widgets, Layout, HBox
-
-# Download and load the dataset.
-fpath = keras.utils.get_file(
-    "moving_mnist.npy",
-    "http://www.cs.toronto.edu/~nitish/unsupervised_video/mnist_test_seq.npy",
-)
-dataset = np.load(fpath)
+from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import CSVLogger
 
 
 def get_data_for_conv_lstm(dataset):
@@ -46,7 +41,7 @@ def get_data_for_conv_lstm(dataset):
     # `x` is frames 0 to n - 1, and `y` is frames 1 to n.
     def create_shifted_frames(data):
         x = data[:, 0 : data.shape[1] - 1, :, :]
-        y = data[:, 1 : data.shape[1]    , :, :]
+        y = data[:, -1:    , :, :]
         return x, y
 
 
@@ -75,6 +70,8 @@ def get_data_for_conv_lstm(dataset):
     return x_train, y_train, x_val, y_val, train_dataset, val_dataset
 
 
+
+
 def run_conv_lstm(x_train, y_train, x_val, y_val):
     # Construct the input layer with no definite frame size.
     inp = layers.Input(shape=(None, *x_train.shape[2:]))
@@ -88,8 +85,10 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         return_sequences=True,
         activation="relu",
     )(inp)
+    x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
-        filters=64,
+        filters=128,
+	strides=(2, 2),
         kernel_size=(5, 5),
         padding="same",
         return_sequences=True,
@@ -97,7 +96,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
     )(x)
     x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
-        filters=64,
+        filters=128,
         kernel_size=(3, 3),
         padding="same",
         return_sequences=True,
@@ -105,20 +104,38 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
     )(x)
     x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
-        filters=64,
+        filters=256,
+	strides=(2, 2),
         kernel_size=(1, 1),
         padding="same",
         return_sequences=True,
         activation="relu",
     )(x)
+    x = layers.BatchNormalization()(x)
     x = layers.Conv3D(
         filters=3, kernel_size=(1, 1, 1), activation="relu", padding="same"
+    )(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Conv3DTranspose(
+        filters=128,
+        kernel_size=(1, 1, 1),
+        activation="relu",
+        padding="same",
+        strides=(1, 2, 2)
+    )(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.Conv3DTranspose(
+        filters=3,
+        kernel_size=(1, 1, 1),
+        activation="relu",
+        padding="same",
+        strides=(1, 2, 2)
     )(x)
 
     # Next, we will build the complete model and compile it.
     model = keras.models.Model(inp, x)
     model.compile(
-        loss=keras.losses.mean_absolute_error, optimizer=keras.optimizers.Adam(learning_rate=0.001), metrics=['mae']
+        loss=keras.losses.mean_absolute_error, optimizer=keras.optimizers.Adam(learning_rate=0.001), metrics=['mae', 'mse']
     )
 
     # Define some callbacks to improve training.
@@ -131,17 +148,18 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
 						  verbose=1)
 
     # Define modifiable training hyperparameters.
-    epochs = 160
-    batch_size = 5
+    epochs = 15
+    batch_size = 4
 
     # Fit the model to the training data.
+    csv_logger = CSVLogger('log.csv', append=True, separator=';')
     model.fit(
         x_train,
         y_train,
         batch_size=batch_size,
         epochs=epochs,
         validation_data=(x_val, y_val),
-        callbacks=[reduce_lr]
+        callbacks=[reduce_lr, csv_logger]
     )
 
     return model
