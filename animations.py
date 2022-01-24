@@ -3,7 +3,7 @@ import numpy as np
 from celluloid import Camera
 
 def animate(images, filename):
-    fig = plt.figure(figsize=(72, 12), dpi=10)
+    fig = plt.figure(figsize=(72, 12), dpi=100)
     ax = plt.axes()
     ims = []
     camera = Camera(fig)
