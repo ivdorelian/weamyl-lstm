@@ -79,7 +79,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
     # We will construct 3 `ConvLSTM2D` layers with batch normalization,
     # followed by a `Conv3D` layer for the spatiotemporal outputs.
     x = layers.ConvLSTM2D(
-        filters=64,
+        filters=128,
         kernel_size=(5, 5),
         padding="same",
         return_sequences=True,
@@ -87,7 +87,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
     )(inp)
     x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
-        filters=128,
+        filters=256,
 	strides=(2, 2),
         kernel_size=(5, 5),
         padding="same",
@@ -96,7 +96,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
     )(x)
     x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
-        filters=128,
+        filters=256,
         kernel_size=(3, 3),
         padding="same",
         return_sequences=True,
@@ -104,7 +104,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
     )(x)
     x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
-        filters=256,
+        filters=512,
 	strides=(2, 2),
         kernel_size=(1, 1),
         padding="same",
@@ -168,7 +168,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
 						  verbose=1)
 
     # Define modifiable training hyperparameters.
-    epochs = 1
+    epochs = 50
     batch_size = 4
 
     # Fit the model to the training data.
