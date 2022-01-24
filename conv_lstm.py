@@ -18,17 +18,25 @@ def get_data_for_conv_lstm(dataset):
     # Split into train and validation sets using indexing to optimize memory.
     indexes = np.arange(dataset.shape[0])
     np.random.shuffle(indexes)
-    train_index = indexes[: int(0.9 * dataset.shape[0])]
-    val_index = indexes[int(0.9 * dataset.shape[0]) :]
-    train_dataset = dataset[train_index]
-    val_dataset = dataset[val_index]
+    train_val_index = indexes[: int(0.8 * dataset.shape[0])]
+    test_index = indexes[int(0.8 * dataset.shape[0]) :]
+    train_val_dataset = dataset[train_val_index]
+    test_dataset = dataset[test_index]
+
+    train_val_index = np.arange(train_val_dataset.shape[0])
+    train_index = train_val_index[: int(0.9 * train_val_dataset.shape[0])]
+    val_index = train_val_index[int(0.9 * train_val_dataset.shape[0]):]
+    train_dataset = train_val_dataset[train_index]
+    val_dataset = train_val_dataset[val_index]
 
     # Normalize the data to the 0-1 range.
     train_dataset[train_dataset < 0] = 0
     train_dataset[train_dataset > 255] = 255
     val_dataset[val_dataset < 0] = 0
     val_dataset[val_dataset > 255] = 255
-    
+    test_dataset[test_dataset < 0] = 0
+    test_dataset[test_dataset > 255] = 255
+
     min_train = np.min(train_dataset)
     max_train = np.max(train_dataset)
 
@@ -36,6 +44,7 @@ def get_data_for_conv_lstm(dataset):
 
     train_dataset = train_dataset
     val_dataset = val_dataset
+    test_dataset = test_dataset
 
     # We'll define a helper function to shift the frames, where
     # `x` is frames 0 to n - 1, and `y` is frames 1 to n.
@@ -48,6 +57,7 @@ def get_data_for_conv_lstm(dataset):
     # Apply the processing function to the datasets.
     x_train, y_train = create_shifted_frames(train_dataset)
     x_val, y_val = create_shifted_frames(val_dataset)
+    x_test, y_test = create_shifted_frames(test_dataset)
 
     # Inspect the dataset.
     print("Training Dataset Shapes: " + str(x_train.shape) + ", " + str(y_train.shape))
@@ -67,7 +77,7 @@ def get_data_for_conv_lstm(dataset):
     # print(f"Displaying frames for example {data_choice}.")
     # plt.show()
 
-    return x_train, y_train, x_val, y_val, train_dataset, val_dataset
+    return x_train, y_train, x_val, y_val, x_test, y_test, train_dataset, val_dataset, test_dataset
 
 
 
@@ -119,6 +129,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         padding="same",
         strides=(2, 2))
     )(x)
+    x = layers.BatchNormalization()(x)
     x = layers.TimeDistributed(layers.Conv2DTranspose(
         filters=128,
         kernel_size=(2, 2),
@@ -168,7 +179,7 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
 						  verbose=1)
 
     # Define modifiable training hyperparameters.
-    epochs = 50
+    epochs = 1
     batch_size = 4
 
     # Fit the model to the training data.
