@@ -17,9 +17,10 @@ def main():
     all = []
     max_preds = 100
     for img, truth in zip(x_test[:100], y_test[:100]):
+        print(img.shape, truth.shape)
         pred = np.asarray(model.predict(np.expand_dims(img, axis=0)), dtype=np.int32)
 
-        all.append(np.concatenate([pred[0, 0, :, :, :], truth[0, :, :, :]], axis=0))
+        all.append(np.concatenate([img[0, :, :, :], img[1, :, :, :], img[2, :, :, :], img[3, :, :, :], pred[0, 0, :, :, :], truth[0, :, :, :]], axis=0))
     #plot_conv_lstm(model, train_dataset, val_dataset)
     animate(all, 'all.gif')
 
