@@ -105,12 +105,6 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         return_sequences=True,
         activation="relu",
     )(x)
-    x = SeqSelfAttention(
-        attention_width=15,
-        attention_activation='sigmoid',
-        name='Attention',
-    )(x)
-
     x = layers.BatchNormalization()(x)
     x = layers.ConvLSTM2D(
         filters=256,
@@ -128,11 +122,6 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         return_sequences=True,
         activation="relu",
     )(x)
-    x = SeqSelfAttention(
-        attention_width=15,
-        attention_activation='sigmoid',
-        name='Attention',
-    )(x)
     x = layers.BatchNormalization()(x)
     x = layers.TimeDistributed(layers.Conv2DTranspose(
         filters=256,
@@ -148,11 +137,6 @@ def run_conv_lstm(x_train, y_train, x_val, y_val):
         activation="relu",
         padding="same",
         strides=(2, 2))
-    )(x)
-    x = SeqSelfAttention(
-        attention_width=15,
-        attention_activation='sigmoid',
-        name='Attention',
     )(x)
     x = layers.Conv3D(
         filters=3,
